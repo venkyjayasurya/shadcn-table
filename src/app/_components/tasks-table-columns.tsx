@@ -28,37 +28,39 @@ import { DataTableColumnHeader } from "@/components/data-table/data-table-column
 
 import { updateTask } from "../_lib/actions"
 import { getPriorityIcon, getStatusIcon } from "../_lib/utils"
-import { DeleteTasksDialog } from "./delete-tasks-dialog"
-import { UpdateTaskSheet } from "./update-task-sheet"
+
+const checkBoxColumn: ColumnDef<unknown> = {
+  id: "select",
+  size: 50,
+  header: ({ table }) => (
+    <Checkbox
+      checked={
+        table.getIsAllPageRowsSelected() ||
+        (table.getIsSomePageRowsSelected() && "indeterminate")
+      }
+      onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+      aria-label="Select all"
+      className="translate-y-0.5"
+    />
+  ),
+  cell: ({ row }) => (
+    <Checkbox
+      checked={row.getIsSelected()}
+      onCheckedChange={(value) => row.toggleSelected(!!value)}
+      aria-label="Select row"
+      className="translate-y-0.5"
+    />
+  ),
+  enableSorting: false,
+  enableHiding: false,
+}
 
 export function getColumns(): ColumnDef<Task>[] {
   return [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-          className="translate-y-0.5"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-          className="translate-y-0.5"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
+    checkBoxColumn as ColumnDef<Task>,
     {
       accessorKey: "code",
+      size: 100,
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Task" />
       ),
@@ -147,10 +149,12 @@ export function getColumns(): ColumnDef<Task>[] {
       header: ({ column }) => (
         <DataTableColumnHeader column={column} title="Created At" />
       ),
+      size: 100,
       cell: ({ cell }) => formatDate(cell.getValue() as Date),
     },
     {
       id: "actions",
+      size: 50,
       cell: function Cell({ row }) {
         const [isUpdatePending, startUpdateTransition] = React.useTransition()
         const [showUpdateTaskSheet, setShowUpdateTaskSheet] =
@@ -160,18 +164,6 @@ export function getColumns(): ColumnDef<Task>[] {
 
         return (
           <>
-            <UpdateTaskSheet
-              open={showUpdateTaskSheet}
-              onOpenChange={setShowUpdateTaskSheet}
-              task={row.original}
-            />
-            <DeleteTasksDialog
-              open={showDeleteTaskDialog}
-              onOpenChange={setShowDeleteTaskDialog}
-              tasks={[row.original]}
-              showTrigger={false}
-              onSuccess={() => row.toggleSelected(false)}
-            />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button

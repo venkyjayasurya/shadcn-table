@@ -48,13 +48,35 @@ export function DataTable<TData>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
+                    <TableHead
+                      colSpan={header.colSpan}
+                      key={header.id}
+                      className="relative"
+                      style={{
+                        width: header.getSize(),
+                      }}
+                    >
+                      {header.isPlaceholder ? null : (
+                        <div className="ml-1">
+                          {flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
+                        </div>
+                      )}
+                      {header.column.getCanResize() && (
+                        <div
+                          {...{
+                            onMouseDown: header.getResizeHandler(),
+                            onTouchStart: header.getResizeHandler(),
+                            className: `absolute top-0 right-0 mr-1 cursor-col-resize w-px h-full bg-black dark:bg-gray-700 hover:bg-gray-300 hover:w-1`,
+                            style: {
+                              userSelect: "none",
+                              touchAction: "none",
+                            },
+                          }}
+                        />
+                      )}
                     </TableHead>
                   )
                 })}
@@ -69,7 +91,13 @@ export function DataTable<TData>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        width: cell.column.getSize(),
+                        minWidth: cell.column.columnDef.minSize,
+                      }}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

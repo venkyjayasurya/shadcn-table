@@ -314,6 +314,8 @@ export function useDataTable<TData, TValue>({
       columnFilters,
     },
     enableRowSelection: true,
+    enableColumnResizing: true,
+    columnResizeMode: "onChange",
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
